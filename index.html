@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<html>
+
+<head>
+    <title>
+        Running Pace Calculator
+    </title>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+        name="viewport"
+        content="width=device-width"
+    />
+</head>
+
+<body>
+    <div class="app">
+        <div class="input__title">
+            Distance
+        </div>
+        <div class="input__field input__field--dist">
+            <input
+                id="INP_DIST"
+                type="number"
+                class="input input--open-end"
+            />
+            <span
+                id="EL_DIST_UNITS"
+                class="input__units"
+                aria-hidden="true"
+            ></span>
+        </div>
+        <div class="button__container">
+            <button
+                id="INP_DIST_MARATHON"
+                class="button"
+                aria-label="Input marathon distance"
+            >
+                Marathon
+            </button>
+            <button
+                id="INP_DIST_HALF"
+                class="button"
+                aria-label="Input half marathon distance"
+            >
+                Half
+            </button>
+            <button
+                id="INP_DIST_BACKYARD"
+                class="button"
+                aria-label="Input backyard lap distance"
+            >
+                Backyard
+            </button>
+        </div>
+
+        <div class="input__title">
+            Time
+        </div>
+        <div class="input__field input__field--time">
+            <input
+                id="INP_TIME_HR"
+                type="number"
+                class="input input--open-end"
+                aria-label="time: hours"
+            />
+            <div class="input__seperator">:</div>
+            <input
+                id="INP_TIME_MIN"
+                type="number"
+                class="input input--open-start input--open-end"
+                aria-label="time: minutes"
+            />
+            <div class="input__seperator">:</div>
+            <input
+                id="INP_TIME_SEC"
+                type="number"
+                class="input input--open-start"
+                aria-label="time: seconds"
+            />
+        </div>
+
+        <div class="input__title">
+            Pace
+        </div>
+        <div class="input__field input__field--pace">
+            <input
+                id="INP_PACE_MIN"
+                type="number"
+                class="input input--open-end"
+            />
+            <div class="input__seperator">:</div>
+            <input
+                id="INP_PACE_SEC"
+                type="number"
+                class="input input--open-end input--open-start"
+            />
+            <span
+                class="input__units"
+                aria-hidden="true"
+            >
+                <span class="input__units--slash">/</span>
+                <span id="EL_PACE_UNITS"></span>
+            </span>
+        </div>
+        <div class="input__micro">
+            <span></span>
+            <span id="EL_PACE_SPEED_SM"></span>
+            <span id="EL_PACE_SPEED_LG"></span>
+        </div>
+
+        <div class="input__title">
+            Units
+        </div>
+        <div class="radio__container">
+            <input
+                id="INP_UNIT_KM"
+                type="radio"
+                name="unit"
+                value="metric"
+                class="radio"
+            />
+            <label for="INP_UNIT_KM">
+                Kilometers
+            </label>
+            <input
+                id="INP_UNIT_MI"
+                type="radio"
+                name="unit"
+                value="imperial"
+                class="radio"
+            />
+            <label for="INP_UNIT_MI">
+                Miles
+            </label>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

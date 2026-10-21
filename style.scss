@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+$f-size-base: 16px;
+$f-size-input: 2.5rem;
+$f-size-label: 1rem;
+$f-family: "Roboto Mono", monospace;
+
+$w-pad-sm: 0.25rem;
+$w-pad-md: 0.5rem;
+$w-pad-lg: 1rem;
+$w-pad-xl: 1.5rem;
+$w-inp-sm: 5rem;
+$w-inp-lg: 6.5rem;
+$w-br: 1rem;
+$w-border: 2px;
+
+$c-bg: #ff7f2f;
+$c-bg-input: #ffffff;
+$c-bg-hover: #f56e00;
+$c-fg: #000000;
+$c-line: #642d00;
+$c-outline: #4da6ff;
+
+html {
+    font-size: $f-size-base;
+}
+
+body {
+    background-color: $c-bg;
+}
+
+body,
+input,
+button,
+label {
+    color: $c-fg;
+    font-family: $f-family;
+}
+
+.app {
+    position: fixed;
+    top: calc(50% - $w-pad-lg);
+    left: 50%;
+    translate: -50% -50%;
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+}
+
+.input {
+    width: $w-inp-sm;
+    border-radius: $w-br;
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &:focus {
+        outline: $w-border solid $c-outline;
+        outline-offset: #{ $w-border * -3 };
+    }
+
+    &__field {
+        display: flex;
+        align-items: center;
+
+        .input:first-child {
+            width: $w-inp-lg;
+        }
+
+        .input:last-child {
+            width: $w-inp-sm + $w-pad-lg;
+            padding-right: $w-pad-lg * 2;
+        }
+
+        &--dist .input:first-child {
+            width: 100%;
+        }
+    }
+
+    &,
+    &__seperator,
+    &__units {
+        padding: $w-pad-md $w-pad-lg;
+        border: $w-border solid $c-line;
+        font-size: $f-size-input;
+        text-align: right;
+        white-space: nowrap;
+        background-color: $c-bg-input;
+    }
+
+    &--open-end {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right-width: 0;
+    }
+
+    &--open-start {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left-width: 0;
+    }
+
+    &__seperator {
+        position: relative;
+        z-index: -1;
+        border-width: $w-border 0;
+
+        $line-height-adjust: 0.125rem;
+        padding: #{ $w-pad-md - $line-height-adjust } 0 #{ $w-pad-md + $line-height-adjust };
+    }
+
+    &__units {
+        padding-left: 0;
+        padding-right: $w-pad-lg * 2;
+        border-radius: 0 $w-br $w-br 0;
+        border-left-width: 0;
+        margin-left: $w-border * -1;
+
+        &--slash {
+            display: inline-block;
+            margin-right: #{ $w-pad-md * -1 };
+        }
+    }
+
+    &__title {
+        margin: $w-pad-xl 0 $w-pad-sm;
+    }
+
+    &__micro {
+        display: grid;
+        text-align: center;
+        grid-template-columns: 1fr 1fr 1fr;
+        margin-top: $w-pad-sm;
+        margin-bottom: -$w-pad-xl;
+    }
+}
+
+.button {
+    background-color: $c-bg;
+    border-radius: $w-pad-md;
+    border: $w-border solid $c-line;
+    text-align: center;
+    padding: $w-pad-sm;
+    cursor: pointer;
+    flex: 1;
+
+    &:hover {
+        background-color: $c-bg-hover;
+    }
+
+    &:focus {
+        outline: $w-border solid $c-outline;
+        outline-offset: $w-border;
+    }
+
+    &__container {
+        display: flex;
+        margin: $w-pad-md 0 0;
+        gap: $w-pad-md;
+    }
+}
+
+.radio {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    flex: 0;
+
+    &+label {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        gap: $w-pad-md;
+        padding: $w-pad-md;
+        border-radius: $w-br;
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: $w-pad-lg;
+            height: $w-pad-lg;
+            border: $w-border solid $c-line;
+            border-radius: 100%;
+            box-shadow: inset 0 0 0 $w-border $c-bg;
+        }
+    }
+
+    &:not(:checked)+label:hover::before {
+        box-shadow: inset 0 0 0 $w-border $c-bg-hover;
+        background-color: $c-bg-hover;
+    }
+
+    &:checked+label::before {
+        background-color: $c-line;
+    }
+
+    &:not(:checked)+label {
+        cursor: pointer;
+    }
+
+    &:focus+label {
+        outline: $w-border solid $c-outline;
+        outline-offset: $w-border;
+    }
+
+    &__container {
+        display: flex;
+        margin-top: $w-pad-sm;
+        margin-left: -$w-pad-md;
+    }
+}
