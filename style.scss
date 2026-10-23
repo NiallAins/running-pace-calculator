@@ -23,6 +23,10 @@ $c-outline: #4da6ff;
 
 html {
     font-size: $f-size-base;
+
+    @media (max-width: 22.5rem) {
+        font-size: $f-size-base * 0.75;
+    }
 }
 
 body {
@@ -45,12 +49,14 @@ label {
     display: flex;
     flex-direction: column;
     width: min-content;
+    max-width: calc(100% - 2rem);
 }
 
 .input {
     width: $w-inp-sm;
     border-radius: $w-br;
     -moz-appearance: textfield;
+    box-sizing: border-box;
 
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
@@ -66,6 +72,7 @@ label {
     &__field {
         display: flex;
         align-items: center;
+        max-width: 100%;
 
         .input:first-child {
             width: $w-inp-lg;
@@ -108,6 +115,7 @@ label {
         position: relative;
         z-index: -1;
         border-width: $w-border 0;
+        margin: 0 -2px;
 
         $line-height-adjust: 0.125rem;
         padding: #{ $w-pad-md - $line-height-adjust } 0 #{ $w-pad-md + $line-height-adjust };
@@ -135,7 +143,7 @@ label {
         text-align: center;
         grid-template-columns: 1fr 1fr 1fr;
         margin-top: $w-pad-sm;
-        margin-bottom: -$w-pad-xl;
+        margin-bottom: -$w-pad-md;
     }
 }
 
@@ -144,7 +152,7 @@ label {
     border-radius: $w-pad-md;
     border: $w-border solid $c-line;
     text-align: center;
-    padding: $w-pad-sm;
+    padding: $w-pad-md $w-pad-sm;
     cursor: pointer;
     flex: 1;
 
@@ -212,4 +220,10 @@ label {
         margin-top: $w-pad-sm;
         margin-left: -$w-pad-md;
     }
+}
+
+.predicted {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    text-align: right;
 }

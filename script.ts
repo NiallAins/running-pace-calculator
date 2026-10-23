@@ -24,7 +24,8 @@ const
         distUnits: getOutputEl('EL_DIST_UNITS'),
         paceUnits: getOutputEl('EL_PACE_UNITS'),
         paceSpeedSm: getOutputEl('EL_PACE_SPEED_SM'),
-        paceSpeedLg: getOutputEl('EL_PACE_SPEED_LG')
+        paceSpeedLg: getOutputEl('EL_PACE_SPEED_LG'),
+        predicted: getOutputEl('EL_PREDICTED')
     };
 
 const
@@ -33,9 +34,11 @@ const
     KM_TO_MI = 1.6093,
     KM_TO_M = 1000,
     MI_TO_FT = 5280,
-    distMarathon = 42.195,
-    distHalf = distMarathon * 0.5,
-    distBackyard = 6.706;
+    DIST_SH = 5,
+    DIST_MD = 10,
+    DIST_MARATHON = 42.195,
+    DIST_HALF = DIST_MARATHON * 0.5,
+    DIST_BACKYARD = 6.706;
 
 const
     MIN_dist = 0.01,
@@ -47,11 +50,20 @@ const
     MAX_DEC_PLACE = 2,
     MAX_DEC_PLACE_SPEED = 1;
 
+// Slope of pace change over dist, for slow and fast runners
+// sourced from real world data
+const
+    EST_SLOPE_SLOW = 6.045,
+    EST_SLOPE_FAST = 4.208,
+    EST_SAMPLE_DIST = 5,
+    EST_SAMPLE_TIME_SLOW = (5.75 * MIN_TO_SEC) * EST_SAMPLE_DIST,
+    EST_SAMPLE_TIME_FAST = (3.75 * MIN_TO_SEC) * EST_SAMPLE_DIST;
+
 const
     STATE = {
         arrowKeyInput: false,
         isMetric: true,
-        dist: distMarathon,
+        dist: DIST_MARATHON,
         time: 3 * HR_TO_SEC,
         pace: 0
     };
@@ -116,18 +128,18 @@ function init() {
 
     // Presets
     INPUTS.distMarathon.onclick = () => {
-        INPUTS.dist.value = STATE.isMetric ? distMarathon : distMarathon / KM_TO_MI;
+        INPUTS.dist.value = STATE.isMetric ? DIST_MARATHON : DIST_MARATHON / KM_TO_MI;
         INPUTS.dist.oninput();
         INPUTS.dist.onblur();
     };
     INPUTS.distHalf.onclick = () => {
-        INPUTS.dist.value = String(STATE.isMetric ? distHalf : distHalf / KM_TO_MI);
+        INPUTS.dist.value = String(STATE.isMetric ? DIST_HALF : DIST_HALF / KM_TO_MI);
         INPUTS.dist.oninput();
         INPUTS.dist.onblur();
 
     };
     INPUTS.distBackyard.onclick = () => {
-        INPUTS.dist.value = String(STATE.isMetric ? distBackyard : distBackyard / KM_TO_MI);
+        INPUTS.dist.value = String(STATE.isMetric ? DIST_BACKYARD : DIST_BACKYARD / KM_TO_MI);
         INPUTS.dist.oninput();
         INPUTS.dist.onblur();
     };
@@ -150,7 +162,7 @@ function onUnitInput(isMetric: boolean) {
 function ondistInput() {
     STATE.dist = parseFloat(INPUTS.dist.value) || 0;
 
-    syncTimeTodist();
+    syncTimeToDist();
     updateUI(INPUTS.dist);
 }
 
@@ -180,7 +192,7 @@ function syncPaceToTime() {
     STATE.pace = STATE.time / STATE.dist;
 }
 
-function syncTimeTodist() {
+function syncTimeToDist() {
     STATE.time = STATE.dist * STATE.pace;
 }
 
@@ -195,7 +207,7 @@ function updateUI(currentInp: Input | null = null) {
     const SCALE = STATE.isMetric ? 1 : KM_TO_MI;
     if (STATE.dist > MAX_dist * SCALE || STATE.dist < MIN_dist * SCALE) {
         STATE.dist = Math.max(MIN_dist * SCALE, Math.min(MAX_dist * SCALE, STATE.dist));
-        syncTimeTodist();
+        syncTimeToDist();
     }
     if (STATE.time > MAX_TIME * SCALE || STATE.time < MIN_TIME * SCALE) {
         STATE.time = Math.max(MIN_TIME * SCALE, Math.min(MAX_TIME * SCALE, STATE.time));
@@ -238,6 +250,36 @@ function updateUI(currentInp: Input | null = null) {
             .padStart(MAX_DEC_PLACE, '0');
     }
 
+    // Set predicited times
+    const
+        UNIT_LABEL = STATE.isMetric ? 'k' : 'M',
+        UNIT_SCALE = (STATE.isMetric ? 1 : KM_TO_MI),
+        DISTS: [string, number][] = [
+            [
+                String(DIST_SH) + UNIT_LABEL,
+                DIST_SH * UNIT_SCALE
+            ],
+            [
+                String(DIST_MD) + UNIT_LABEL,
+                DIST_MD * UNIT_SCALE
+            ],
+            [
+                Math.floor(DIST_HALF / UNIT_SCALE) + UNIT_LABEL,
+                DIST_HALF
+            ],
+            [
+                Math.floor(DIST_MARATHON / UNIT_SCALE) + UNIT_LABEL,
+                DIST_MARATHON
+            ],
+        ];
+    OUTPUTS.predicted.innerHTML = DISTS
+        .map(([label, dist]) => [
+            label,
+            formatTime(estimateTime(STATE.dist * SCALE, STATE.time, dist))
+        ])
+        .map(([label, time]) => `<span>${ label }</span><span>${ time }</span>`)
+        .join('');
+
     // Set units
     OUTPUTS.distUnits.innerHTML = STATE.isMetric ? 'km' : 'mi';
     OUTPUTS.paceUnits.innerHTML = STATE.isMetric ? 'km' : 'mi';
@@ -257,9 +299,36 @@ function paceToSpeed(pace: number, metric: boolean, short: boolean): number {
     return formatDecimal(SPEED, MAX_DEC_PLACE_SPEED);
 }
 
+function estimateTime(fromDist: number, fromTime: number, toDist: number): number {
+    // Get fast time and slow time for fromDist
+    //   compare to prevTime to find relative pace slope
+    //   use slope to estimate time for toDist
+    const
+        FROM_DIST_AT_SLOW_PACE = EST_SAMPLE_TIME_SLOW - (EST_SLOPE_SLOW * (EST_SAMPLE_DIST - fromDist)),
+        FROM_DIST_AT_FAST_PACE = EST_SAMPLE_TIME_FAST - (EST_SLOPE_FAST * (EST_SAMPLE_DIST - fromDist)),
+        FROM_PACE_SCALE = (fromTime - FROM_DIST_AT_SLOW_PACE) / (FROM_DIST_AT_FAST_PACE - FROM_DIST_AT_SLOW_PACE),
+        PACE_SLOPE = EST_SLOPE_SLOW + ((EST_SLOPE_FAST - EST_SLOPE_SLOW) * FROM_PACE_SCALE),
+        FROM_DIST_AT_TO_PACE = fromTime - (PACE_SLOPE * (fromDist - toDist));
+
+    return FROM_DIST_AT_TO_PACE * (toDist / fromDist);
+}
+
 function formatDecimal(num: number, max: number): number {
     const POW = 10 ** (max + 1);
     return Math.round(num * POW) / POW;
+}
+
+function formatTime(seconds: number): string {
+    seconds = Math.round(seconds);
+    const HRS = Math.floor(seconds / HR_TO_SEC);
+    seconds %= HR_TO_SEC;
+    const MINS = Math.floor(seconds / MIN_TO_SEC);
+    seconds %= MIN_TO_SEC;
+    return (
+        (HRS ? HRS + ':' : '') +
+        (MINS || HRS ? MINS.toString().padStart(HRS ? 2 : 1, '0') + ':' : '') +
+        (seconds.toString().padStart(HRS || MINS ? 2 : 1, '0'))
+    );
 }
 
 init();
