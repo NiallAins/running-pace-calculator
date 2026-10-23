@@ -45,6 +45,7 @@ label {
 .input:focus {
   outline: 2px solid #4da6ff;
   outline-offset: -6px;
+  cursor: none;
 }
 .input__field {
   display: flex;
@@ -102,10 +103,11 @@ label {
 }
 .input__micro {
   display: grid;
-  text-align: center;
   grid-template-columns: 1fr 1fr 1fr;
+  padding-right: 0.25rem;
   margin-top: 0.25rem;
   margin-bottom: -0.5rem;
+  text-align: right;
 }
 
 .button {
@@ -176,5 +178,9 @@ label {
 .predicted {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding-right: 0.25rem;
   text-align: right;
+}
+.predicted > :nth-child(2n) {
+  padding-left: 1rem;
 }

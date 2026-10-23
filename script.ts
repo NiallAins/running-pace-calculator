@@ -4,6 +4,10 @@ interface Input extends HTMLInputElement {
     get value(): string;
     oninput: (e?: Event) => void;
     onblur: (e?: Event) => void;
+    dataset: {
+        prevValue: string,
+        hasEdit: string
+    };
 }
 
 const
@@ -89,42 +93,14 @@ function init() {
     INPUTS.unitKm.onclick = () => onUnitInput(true);
     INPUTS.unitMi.onclick = () => onUnitInput(false);
 
-    // Value change
-    INPUTS.dist.oninput = () => ondistInput();
-    INPUTS.paceMin.oninput = e => onPaceInput(e?.target as Input);
-    INPUTS.paceSec.oninput = e => onPaceInput(e?.target as Input);
-    INPUTS.timeHr.oninput = e => onTimeInput(e?.target as Input);
-    INPUTS.timeMin.oninput = e => onTimeInput(e?.target as Input);
-    INPUTS.timeSec.oninput = e => onTimeInput(e?.target as Input);
-
-    // Up / down key input
-    INPUTS.dist.onkeydown =
-        INPUTS.paceMin.onkeydown =
-        INPUTS.paceSec.onkeydown =
-        INPUTS.timeHr.onkeydown =
-        INPUTS.timeMin.onkeydown =
-        INPUTS.timeSec.onkeydown =
-        e => e.key === 'ArrowDown' || e.key === 'ArrowUp'
-            ? STATE.arrowKeyInput = true
-            : null;
-
-    // Input focus
-    INPUTS.dist.onfocus =
-        INPUTS.paceMin.onfocus =
-        INPUTS.paceSec.onfocus =
-        INPUTS.timeHr.onfocus =
-        INPUTS.timeMin.onfocus =
-        INPUTS.timeSec.onfocus =
-        e => (e.target as Input).select();
-
-    // Input format on blur
-    INPUTS.dist.onblur =
-        INPUTS.paceMin.onblur =
-        INPUTS.paceSec.onblur =
-        INPUTS.timeHr.onblur =
-        INPUTS.timeMin.onblur =
-        INPUTS.timeSec.onblur =
-        () => updateUI();
+    // Set up input events
+    initInput(INPUTS.dist,    onDistInput);
+    initInput(INPUTS.paceMin, onPaceInput);
+    initInput(INPUTS.paceSec, onPaceInput);
+    initInput(INPUTS.timeHr,  onTimeInput);
+    initInput(INPUTS.timeMin, onTimeInput);
+    initInput(INPUTS.timeSec, onTimeInput);
+        
 
     // Presets
     INPUTS.distMarathon.onclick = () => {
@@ -147,6 +123,37 @@ function init() {
     onTimeInput(INPUTS.timeHr);
 }
 
+function initInput(inp: Input, onInput: (e: Input) => void) {
+    inp.dataset.prevValue = '';
+    inp.dataset.hasEdit = '';
+
+    inp.onfocus = () => {
+        inp.dataset.prevValue = inp.value;
+        inp.placeholder = inp.value;
+        inp.value = '';
+    };
+
+    inp.oninput = e => {
+        onInput(e!.target as Input);
+        inp.dataset.hasEdit = 'true';
+    };
+
+    inp.onkeydown = e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            STATE.arrowKeyInput = true
+        }
+    };
+
+    inp.onblur = () => {
+        if (!inp.dataset.hasEdit) {
+            inp.value = inp.dataset.prevValue;
+        } else {
+            inp.dataset.hasEdit = '';
+            updateUI();
+        }
+    };
+}
+
 function onUnitInput(isMetric: boolean) {
     if (isMetric !== STATE.isMetric) {
         STATE.isMetric = isMetric;
@@ -159,7 +166,7 @@ function onUnitInput(isMetric: boolean) {
     }
 }
 
-function ondistInput() {
+function onDistInput() {
     STATE.dist = parseFloat(INPUTS.dist.value) || 0;
 
     syncTimeToDist();
@@ -234,10 +241,10 @@ function updateUI(currentInp: Input | null = null) {
             .toString()
             .padStart(MAX_DEC_PLACE, '0');
     }
-    if (currentInp !== INPUTS.timeHr) {
+    if (currentInp !== INPUTS.timeHr && currentInp !== INPUTS.timeMin && currentInp !== INPUTS.timeSec) {
         INPUTS.timeHr.value = String(Math.floor(STATE.time / HR_TO_SEC));
     }
-    if (currentInp !== INPUTS.timeMin) {
+    if (currentInp !== INPUTS.timeMin && currentInp !== INPUTS.timeSec) {
         INPUTS.timeMin.value = Math
             .floor((STATE.time % HR_TO_SEC) / MIN_TO_SEC)
             .toString()

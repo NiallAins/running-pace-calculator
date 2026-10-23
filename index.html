@@ -5,18 +5,39 @@
 
 <head>
     <title>
-        Running Pace Calculator
+        Pace Calculator
     </title>
+
     <meta
         name="viewport"
         content="width=device-width"
     />
     
-    <link rel="stylesheet" href="style.css" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
-    <link rel="manifest" href="./site.webmanifest">
+    <link
+        rel="stylesheet" 
+        href="style.css"
+    />
+    <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="./icons/apple-touch-icon.png"
+    />
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="./icons/favicon-32x32.png"
+    />
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="16x16"
+        href="./icons/favicon-16x16.png"
+    />
+    <link
+        rel="manifest"
+        href="./manifest.json"
+    />
 </head>
 
 <body>
@@ -28,6 +49,10 @@
             <input
                 id="INP_DIST"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9.]*"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-end"
             />
             <span
@@ -67,6 +92,10 @@
             <input
                 id="INP_TIME_HR"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-end"
                 aria-label="time: hours"
             />
@@ -74,6 +103,10 @@
             <input
                 id="INP_TIME_MIN"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9][0-9]"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-start input--open-end"
                 aria-label="time: minutes"
             />
@@ -81,6 +114,10 @@
             <input
                 id="INP_TIME_SEC"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9][0-9]"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-start"
                 aria-label="time: seconds"
             />
@@ -93,12 +130,20 @@
             <input
                 id="INP_PACE_MIN"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9][0-9]"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-end"
             />
             <div class="input__seperator">:</div>
             <input
                 id="INP_PACE_SEC"
                 type="number"
+                inputmode="numeric"
+                pattern="[0-9][0-9]"
+                spellcheck="false"
+                autocomplete="off"
                 class="input input--open-end input--open-start"
             />
             <span

@@ -67,6 +67,7 @@ label {
     &:focus {
         outline: $w-border solid $c-outline;
         outline-offset: #{ $w-border * -3 };
+        cursor: none;
     }
 
     &__field {
@@ -140,10 +141,11 @@ label {
 
     &__micro {
         display: grid;
-        text-align: center;
         grid-template-columns: 1fr 1fr 1fr;
+        padding-right: $w-pad-sm;
         margin-top: $w-pad-sm;
         margin-bottom: -$w-pad-md;
+        text-align: right;
     }
 }
 
@@ -225,5 +227,10 @@ label {
 .predicted {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding-right: $w-pad-sm;
     text-align: right;
+
+    & > :nth-child(2n) {
+        padding-left: $w-pad-lg;
+    }
 }
