@@ -244,3 +244,16 @@ label {
         padding-left: $w-pad-lg;
     }
 }
+
+.download {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    background-color: $c-bg;
+    background-image: url('./icons/download.svg');
+    background-size: cover;
+    cursor: pointer;
+}

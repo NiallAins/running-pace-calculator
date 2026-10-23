@@ -33,13 +33,14 @@ const INPUTS = {
     timeSec: getInputEl('INP_TIME_SEC'),
     distHalf: getInputEl('INP_DIST_HALF'),
     distMarathon: getInputEl('INP_DIST_MARATHON'),
-    distBackyard: getInputEl('INP_DIST_BACKYARD')
+    distBackyard: getInputEl('INP_DIST_BACKYARD'),
+    download: getOutputEl('EL_DOWNLOAD')
 }, OUTPUTS = {
     distUnits: getOutputEl('EL_DIST_UNITS'),
     paceUnits: getOutputEl('EL_PACE_UNITS'),
     paceSpeedSm: getOutputEl('EL_PACE_SPEED_SM'),
     paceSpeedLg: getOutputEl('EL_PACE_SPEED_LG'),
-    predicted: getOutputEl('EL_PREDICTED')
+    predicted: getOutputEl('EL_PREDICTED'),
 };
 function getInputEl(id) {
     return document.getElementById(id);
@@ -47,10 +48,6 @@ function getInputEl(id) {
 function getOutputEl(id) {
     return document.getElementById(id);
 }
-window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    console.log('hey!!');
-});
 //
 // Init UI
 //
@@ -66,12 +63,12 @@ function init() {
     INPUTS.unitKm.onclick = () => onUnitInput(true);
     INPUTS.unitMi.onclick = () => onUnitInput(false);
     // Set up input events
-    initInput(INPUTS.dist, 8, onDistInput);
-    initInput(INPUTS.paceMin, 2, onPaceInput);
-    initInput(INPUTS.paceSec, 2, onPaceInput);
-    initInput(INPUTS.timeHr, 3, onTimeInput);
-    initInput(INPUTS.timeMin, 2, onTimeInput);
-    initInput(INPUTS.timeSec, 2, onTimeInput);
+    initInput(INPUTS.dist, 4, 3, onDistInput);
+    initInput(INPUTS.paceMin, 2, 0, onPaceInput);
+    initInput(INPUTS.paceSec, 2, 0, onPaceInput);
+    initInput(INPUTS.timeHr, 3, 0, onTimeInput);
+    initInput(INPUTS.timeMin, 2, 0, onTimeInput);
+    initInput(INPUTS.timeSec, 2, 0, onTimeInput);
     // Presets
     INPUTS.distMarathon.onclick = () => {
         INPUTS.dist.value = STATE.isMetric ? DIST_MARATHON : DIST_MARATHON / KM_TO_MI;
@@ -89,18 +86,24 @@ function init() {
         INPUTS.dist.onblur();
     };
     onTimeInput(INPUTS.timeHr);
+    // Web app download button
+    let installEvent = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        installEvent = e;
+    });
+    INPUTS.download.onclick = () => installEvent?.prompt();
 }
-function initInput(inp, maxLength, onInput) {
+function initInput(inp, maxInt, maxDecimal, onInput) {
     inp.dataset.prevValue = '';
     inp.onfocus = () => {
         inp.placeholder = inp.dataset.prevValue = inp.value;
         inp.value = '';
     };
     inp.oninput = () => {
-        if (inp.value.length > maxLength) {
-            inp.value = inp.value.substring(0, maxLength);
-        }
-        else {
+        const VALUE = inp.value;
+        inp.value = inp.value.replace(/([0-9]*).([0-9]*)/, (_, m0, m1) => m0.substring(0, maxInt) + (maxDecimal === 0 || !m1 ? '' : '.' + m1.substring(0, maxDecimal)));
+        if (VALUE === inp.value) {
             onInput(inp);
         }
     };
