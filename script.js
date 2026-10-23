@@ -102,7 +102,6 @@ function initInput(inp, maxInt, maxDecimal, onInput) {
         inp.dataset.hideCursor = '';
     };
     inp.oninput = () => {
-        console.log(inp.value);
         let newValue = inp.value
             .replace(/[^0-9.]/g, '')
             .replace(new RegExp(`^([0-9]{${maxInt}})[0-9]*`), '$1');
