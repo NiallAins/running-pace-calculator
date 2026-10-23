@@ -99,14 +99,25 @@ function initInput(inp, maxInt, maxDecimal, onInput) {
     inp.onfocus = () => {
         inp.placeholder = inp.dataset.prevValue = inp.value;
         inp.value = '';
+        inp.dataset.hideCursor = '';
     };
     inp.oninput = () => {
-        const VALUE = inp.value;
-        inp.value = inp.value.replace(/([0-9]*).([0-9]*)/, (_, m0, m1) => m0.substring(0, maxInt) + (maxDecimal === 0 || !m1 ? '' : '.' + m1.substring(0, maxDecimal)));
-        if (VALUE === inp.value) {
-            onInput(inp);
+        console.log(inp.value);
+        let newValue = inp.value
+            .replace(/[^0-9.]/g, '')
+            .replace(new RegExp(`^([0-9]{${maxInt}})[0-9]*`), '$1');
+        if (maxDecimal) {
+            newValue = newValue.replace(new RegExp(`(\.[0-9]{${maxDecimal}})[0-9]*$`), '$1');
         }
+        else {
+            newValue = newValue.replace(/\.[0-9]*/, '');
+        }
+        if (inp.value !== newValue) {
+            inp.value = newValue;
+        }
+        onInput(inp);
     };
+    inp.onmousemove = () => delete inp.dataset.hideCursor;
     inp.onkeydown = e => {
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
             inp.dataset.hasCaret = '';

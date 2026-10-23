@@ -4,7 +4,7 @@ html {
 }
 @media (max-width: 22.5rem) {
   html {
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
@@ -54,6 +54,8 @@ label {
 .input:focus {
   outline: 2px solid #4da6ff;
   outline-offset: -6px;
+}
+.input:focus[data-hide-cursor] {
   cursor: none;
 }
 .input__field {

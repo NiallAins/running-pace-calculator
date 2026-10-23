@@ -25,7 +25,7 @@ html {
     font-size: $f-size-base;
 
     @media (max-width: 22.5rem) {
-        font-size: $f-size-base * 0.75;
+        font-size: $f-size-base * 0.875;
     }
 }
 
@@ -77,7 +77,10 @@ label {
     &:focus {
         outline: $w-border solid $c-outline;
         outline-offset: #{ $w-border * -3 };
-        cursor: none;
+
+        &[data-hide-cursor] {
+            cursor: none;
+        }
     }
 
     &__field {
