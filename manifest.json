@@ -2,6 +2,7 @@
     "name": "Pace Calculator",
     "short_name": "PaceCalc",
     "theme_color": "#ff7f2f",
+    "description": "A minimal app for calculating running paces, distances, and times.",
     "icons": [
         {
             "src": "./icons/android-chrome-192x192.png",

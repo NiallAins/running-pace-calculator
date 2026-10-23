@@ -1,4 +1,27 @@
 "use strict";
+//
+// Types
+//
+//
+// Readonly variables
+//
+const MIN_TO_SEC = 60, HR_TO_SEC = 60 * MIN_TO_SEC, KM_TO_MI = 1.6093, KM_TO_M = 1000, MI_TO_FT = 5280, DIST_SH = 5, DIST_MD = 10, DIST_MARATHON = 42.195, DIST_HALF = DIST_MARATHON * 0.5, DIST_BACKYARD = 6.706;
+const MIN_DIST = 0.01, MAX_DIST = 9999, MIN_TIME = 1, MAX_TIME = (999 * HR_TO_SEC) + (59 * MIN_TO_SEC) + 59, MIN_PACE = (1 * MIN_TO_SEC) + 20, MAX_PACE = (999 * MIN_TO_SEC) + 59, MAX_DEC_PLACE = 2, MAX_DEC_PLACE_SPEED = 1;
+// Slope of pace change over dist, for slow and fast runners - sourced from real world data
+const EST_SLOPE_SLOW = 6.045, EST_SLOPE_FAST = 4.208, EST_SAMPLE_DIST = 5, EST_SAMPLE_TIME_SLOW = (5.75 * MIN_TO_SEC) * EST_SAMPLE_DIST, EST_SAMPLE_TIME_FAST = (3.75 * MIN_TO_SEC) * EST_SAMPLE_DIST;
+//
+// State variables
+//
+const STATE = {
+    arrowKeyInput: false,
+    isMetric: true,
+    dist: DIST_MARATHON,
+    time: 3 * HR_TO_SEC,
+    pace: 0
+};
+//
+// Elements
+//
 const INPUTS = {
     dist: getInputEl('INP_DIST'),
     unitKm: getInputEl('INP_UNIT_KM'),
@@ -18,24 +41,19 @@ const INPUTS = {
     paceSpeedLg: getOutputEl('EL_PACE_SPEED_LG'),
     predicted: getOutputEl('EL_PREDICTED')
 };
-const MIN_TO_SEC = 60, HR_TO_SEC = 60 * MIN_TO_SEC, KM_TO_MI = 1.6093, KM_TO_M = 1000, MI_TO_FT = 5280, DIST_SH = 5, DIST_MD = 10, DIST_MARATHON = 42.195, DIST_HALF = DIST_MARATHON * 0.5, DIST_BACKYARD = 6.706;
-const MIN_dist = 0.01, MAX_dist = 9999, MIN_TIME = 1, MAX_TIME = (999 * HR_TO_SEC) + (59 * MIN_TO_SEC) + 59, MIN_PACE = (1 * MIN_TO_SEC) + 20, MAX_PACE = (999 * MIN_TO_SEC) + 59, MAX_DEC_PLACE = 2, MAX_DEC_PLACE_SPEED = 1;
-// Slope of pace change over dist, for slow and fast runners
-// sourced from real world data
-const EST_SLOPE_SLOW = 6.045, EST_SLOPE_FAST = 4.208, EST_SAMPLE_DIST = 5, EST_SAMPLE_TIME_SLOW = (5.75 * MIN_TO_SEC) * EST_SAMPLE_DIST, EST_SAMPLE_TIME_FAST = (3.75 * MIN_TO_SEC) * EST_SAMPLE_DIST;
-const STATE = {
-    arrowKeyInput: false,
-    isMetric: true,
-    dist: DIST_MARATHON,
-    time: 3 * HR_TO_SEC,
-    pace: 0
-};
 function getInputEl(id) {
     return document.getElementById(id);
 }
 function getOutputEl(id) {
     return document.getElementById(id);
 }
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    console.log('hey!!');
+});
+//
+// Init UI
+//
 function init() {
     // Init default state
     INPUTS.unitKm.checked = STATE.isMetric;
@@ -48,12 +66,12 @@ function init() {
     INPUTS.unitKm.onclick = () => onUnitInput(true);
     INPUTS.unitMi.onclick = () => onUnitInput(false);
     // Set up input events
-    initInput(INPUTS.dist, onDistInput);
-    initInput(INPUTS.paceMin, onPaceInput);
-    initInput(INPUTS.paceSec, onPaceInput);
-    initInput(INPUTS.timeHr, onTimeInput);
-    initInput(INPUTS.timeMin, onTimeInput);
-    initInput(INPUTS.timeSec, onTimeInput);
+    initInput(INPUTS.dist, 8, onDistInput);
+    initInput(INPUTS.paceMin, 2, onPaceInput);
+    initInput(INPUTS.paceSec, 2, onPaceInput);
+    initInput(INPUTS.timeHr, 3, onTimeInput);
+    initInput(INPUTS.timeMin, 2, onTimeInput);
+    initInput(INPUTS.timeSec, 2, onTimeInput);
     // Presets
     INPUTS.distMarathon.onclick = () => {
         INPUTS.dist.value = STATE.isMetric ? DIST_MARATHON : DIST_MARATHON / KM_TO_MI;
@@ -72,33 +90,47 @@ function init() {
     };
     onTimeInput(INPUTS.timeHr);
 }
-function initInput(inp, onInput) {
+function initInput(inp, maxLength, onInput) {
     inp.dataset.prevValue = '';
-    inp.dataset.hasEdit = '';
     inp.onfocus = () => {
-        inp.dataset.prevValue = inp.value;
-        inp.placeholder = inp.value;
+        inp.placeholder = inp.dataset.prevValue = inp.value;
         inp.value = '';
     };
-    inp.oninput = e => {
-        onInput(e.target);
-        inp.dataset.hasEdit = 'true';
+    inp.oninput = () => {
+        if (inp.value.length > maxLength) {
+            inp.value = inp.value.substring(0, maxLength);
+        }
+        else {
+            onInput(inp);
+        }
     };
     inp.onkeydown = e => {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            inp.dataset.hasCaret = '';
+        }
+        else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             STATE.arrowKeyInput = true;
+        }
+        if (e.key.indexOf('Arrow') === 0 && !inp.value) {
+            inp.value = inp.dataset.prevValue;
+        }
+        if (e.key === 'Enter') {
+            document.body.focus();
         }
     };
     inp.onblur = () => {
-        if (!inp.dataset.hasEdit) {
-            inp.value = inp.dataset.prevValue;
-        }
-        else {
-            inp.dataset.hasEdit = '';
+        if (inp.value) {
             updateUI();
         }
+        else {
+            inp.value = inp.dataset.prevValue;
+        }
+        delete inp.dataset.hasCaret;
     };
 }
+//
+// Input events
+//
 function onUnitInput(isMetric) {
     if (isMetric !== STATE.isMetric) {
         STATE.isMetric = isMetric;
@@ -128,6 +160,9 @@ function onPaceInput(currentInput = null) {
     syncTimeToPace();
     updateUI(currentInput);
 }
+//
+// Data sync
+//
 function syncTimeToPace() {
     STATE.time = STATE.pace * STATE.dist;
 }
@@ -137,6 +172,9 @@ function syncPaceToTime() {
 function syncTimeToDist() {
     STATE.time = STATE.dist * STATE.pace;
 }
+//
+// UI
+//
 function updateUI(currentInp = null) {
     // Only format current input when editing via keyboard arrows
     if (STATE.arrowKeyInput) {
@@ -145,8 +183,8 @@ function updateUI(currentInp = null) {
     }
     // Set input max / min
     const SCALE = STATE.isMetric ? 1 : KM_TO_MI;
-    if (STATE.dist > MAX_dist * SCALE || STATE.dist < MIN_dist * SCALE) {
-        STATE.dist = Math.max(MIN_dist * SCALE, Math.min(MAX_dist * SCALE, STATE.dist));
+    if (STATE.dist > MAX_DIST * SCALE || STATE.dist < MIN_DIST * SCALE) {
+        STATE.dist = Math.max(MIN_DIST * SCALE, Math.min(MAX_DIST * SCALE, STATE.dist));
         syncTimeToDist();
     }
     if (STATE.time > MAX_TIME * SCALE || STATE.time < MIN_TIME * SCALE) {
@@ -223,6 +261,9 @@ function updateUI(currentInp = null) {
     INPUTS.paceMin.setAttribute('aria-label', `pace per ${STATE.isMetric ? 'kilometer' : 'mile'}: minutes`);
     INPUTS.paceSec.setAttribute('aria-label', `pace per ${STATE.isMetric ? 'kilometer' : 'mile'}: seconds`);
 }
+//
+// Conversion
+//
 function paceToSpeed(pace, metric, short) {
     const SPEED = short
         ? (metric ? KM_TO_M : MI_TO_FT) / pace
@@ -236,6 +277,9 @@ function estimateTime(fromDist, fromTime, toDist) {
     const FROM_DIST_AT_SLOW_PACE = EST_SAMPLE_TIME_SLOW - (EST_SLOPE_SLOW * (EST_SAMPLE_DIST - fromDist)), FROM_DIST_AT_FAST_PACE = EST_SAMPLE_TIME_FAST - (EST_SLOPE_FAST * (EST_SAMPLE_DIST - fromDist)), FROM_PACE_SCALE = (fromTime - FROM_DIST_AT_SLOW_PACE) / (FROM_DIST_AT_FAST_PACE - FROM_DIST_AT_SLOW_PACE), PACE_SLOPE = EST_SLOPE_SLOW + ((EST_SLOPE_FAST - EST_SLOPE_SLOW) * FROM_PACE_SCALE), FROM_DIST_AT_TO_PACE = fromTime - (PACE_SLOPE * (fromDist - toDist));
     return FROM_DIST_AT_TO_PACE * (toDist / fromDist);
 }
+//
+// Formatting
+//
 function formatDecimal(num, max) {
     const POW = 10 ** (max + 1);
     return Math.round(num * POW) / POW;
