@@ -117,7 +117,7 @@ label {
   grid-template-columns: 1fr 1fr 1fr;
   padding-right: 0.25rem;
   margin-top: 0.25rem;
-  margin-bottom: -0.5rem;
+  margin-bottom: -1rem;
   text-align: right;
 }
 
@@ -198,7 +198,7 @@ label {
 
 .download {
   position: fixed;
-  right: 1.5rem;
+  left: min(100vw - 4rem, 50% + 11rem);
   bottom: 1.5rem;
   width: 2.5rem;
   height: 2.5rem;

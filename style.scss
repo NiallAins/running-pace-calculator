@@ -157,7 +157,7 @@ label {
         grid-template-columns: 1fr 1fr 1fr;
         padding-right: $w-pad-sm;
         margin-top: $w-pad-sm;
-        margin-bottom: -$w-pad-md;
+        margin-bottom: -$w-pad-lg;
         text-align: right;
     }
 }
@@ -250,7 +250,7 @@ label {
 
 .download {
     position: fixed;
-    right: 1.5rem;
+    left: min(calc(100vw - 4rem), calc(50% + 11rem));
     bottom: 1.5rem;
     width: 2.5rem;
     height: 2.5rem;

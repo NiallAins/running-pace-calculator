@@ -52,6 +52,14 @@ function getOutputEl(id) {
 // Init UI
 //
 function init() {
+    // Web app download button
+    let installEvent = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        installEvent = e;
+        INPUTS.download.hidden = false;
+    });
+    INPUTS.download.onclick = () => installEvent?.prompt();
     // Init default state
     INPUTS.unitKm.checked = STATE.isMetric;
     INPUTS.unitMi.checked = !STATE.isMetric;
@@ -63,12 +71,12 @@ function init() {
     INPUTS.unitKm.onclick = () => onUnitInput(true);
     INPUTS.unitMi.onclick = () => onUnitInput(false);
     // Set up input events
-    initInput(INPUTS.dist, 4, 3, onDistInput);
-    initInput(INPUTS.paceMin, 2, 0, onPaceInput);
-    initInput(INPUTS.paceSec, 2, 0, onPaceInput);
-    initInput(INPUTS.timeHr, 3, 0, onTimeInput);
-    initInput(INPUTS.timeMin, 2, 0, onTimeInput);
-    initInput(INPUTS.timeSec, 2, 0, onTimeInput);
+    initInput(INPUTS.dist, onDistInput, 4, MAX_DEC_PLACE);
+    initInput(INPUTS.paceMin, onPaceInput, 2);
+    initInput(INPUTS.paceSec, onPaceInput, 2);
+    initInput(INPUTS.timeHr, onTimeInput, 3);
+    initInput(INPUTS.timeMin, onTimeInput, 2);
+    initInput(INPUTS.timeSec, onTimeInput, 2);
     // Presets
     INPUTS.distMarathon.onclick = () => {
         INPUTS.dist.value = STATE.isMetric ? DIST_MARATHON : DIST_MARATHON / KM_TO_MI;
@@ -86,15 +94,8 @@ function init() {
         INPUTS.dist.onblur();
     };
     onTimeInput(INPUTS.timeHr);
-    // Web app download button
-    let installEvent = null;
-    window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        installEvent = e;
-    });
-    INPUTS.download.onclick = () => installEvent?.prompt();
 }
-function initInput(inp, maxInt, maxDecimal, onInput) {
+function initInput(inp, onInput, maxInt, maxDecimal = 0) {
     inp.dataset.prevValue = '';
     inp.onfocus = () => {
         inp.placeholder = inp.dataset.prevValue = inp.value;
@@ -106,7 +107,7 @@ function initInput(inp, maxInt, maxDecimal, onInput) {
             .replace(/[^0-9.]/g, '')
             .replace(new RegExp(`^([0-9]{${maxInt}})[0-9]*`), '$1');
         if (maxDecimal) {
-            newValue = newValue.replace(new RegExp(`(\.[0-9]{${maxDecimal}})[0-9]*$`), '$1');
+            newValue = newValue.replace(new RegExp(`(\\.[0-9]{${maxDecimal}})[0-9]*$`), '$1');
         }
         else {
             newValue = newValue.replace(/\.[0-9]*/, '');
@@ -221,7 +222,7 @@ function updateUI(currentInp = null) {
         INPUTS.paceSec.value = Math
             .round(STATE.pace % MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
     if (currentInp !== INPUTS.timeHr && currentInp !== INPUTS.timeMin && currentInp !== INPUTS.timeSec) {
         INPUTS.timeHr.value = String(Math.floor(STATE.time / HR_TO_SEC));
@@ -230,13 +231,13 @@ function updateUI(currentInp = null) {
         INPUTS.timeMin.value = Math
             .floor((STATE.time % HR_TO_SEC) / MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
     if (currentInp !== INPUTS.timeSec) {
         INPUTS.timeSec.value = Math
             .round(STATE.time % MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
     // Set predicited times
     const UNIT_LABEL = STATE.isMetric ? 'k' : 'M', UNIT_SCALE = (STATE.isMetric ? 1 : KM_TO_MI), DISTS = [
@@ -294,7 +295,7 @@ function estimateTime(fromDist, fromTime, toDist) {
 // Formatting
 //
 function formatDecimal(num, max) {
-    const POW = 10 ** (max + 1);
+    const POW = 10 ** max;
     return Math.round(num * POW) / POW;
 }
 function formatTime(seconds) {

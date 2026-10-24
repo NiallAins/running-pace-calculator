@@ -106,6 +106,15 @@ function getOutputEl(id: string) {
 //
 
 function init() {
+    // Web app download button
+    let installEvent: { prompt: () => {} } | null = null;
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        installEvent = e as any;
+        INPUTS.download.hidden = false;
+    });
+    INPUTS.download.onclick = () => installEvent?.prompt();
+
     // Init default state
     INPUTS.unitKm.checked = STATE.isMetric;
     INPUTS.unitMi.checked = !STATE.isMetric;
@@ -119,12 +128,12 @@ function init() {
     INPUTS.unitMi.onclick = () => onUnitInput(false);
 
     // Set up input events
-    initInput(INPUTS.dist,    4, 3, onDistInput);
-    initInput(INPUTS.paceMin, 2, 0, onPaceInput);
-    initInput(INPUTS.paceSec, 2, 0, onPaceInput);
-    initInput(INPUTS.timeHr,  3, 0, onTimeInput);
-    initInput(INPUTS.timeMin, 2, 0, onTimeInput);
-    initInput(INPUTS.timeSec, 2, 0, onTimeInput);
+    initInput(INPUTS.dist,    onDistInput, 4, MAX_DEC_PLACE);
+    initInput(INPUTS.paceMin, onPaceInput, 2);
+    initInput(INPUTS.paceSec, onPaceInput, 2);
+    initInput(INPUTS.timeHr,  onTimeInput, 3);
+    initInput(INPUTS.timeMin, onTimeInput, 2);
+    initInput(INPUTS.timeSec, onTimeInput, 2);
         
 
     // Presets
@@ -146,18 +155,9 @@ function init() {
     };
 
     onTimeInput(INPUTS.timeHr);
-
-
-    // Web app download button
-    let installEvent: { prompt: () => {} } | null = null;
-    window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        installEvent = e as any;
-    });
-    INPUTS.download.onclick = () => installEvent?.prompt();
 }
 
-function initInput(inp: Input, maxInt: number, maxDecimal: number, onInput: (e: Input) => void) {
+function initInput(inp: Input, onInput: (e: Input) => void, maxInt: number, maxDecimal: number = 0) {
     inp.dataset.prevValue = '';
 
     inp.onfocus = () => {
@@ -172,7 +172,7 @@ function initInput(inp: Input, maxInt: number, maxDecimal: number, onInput: (e: 
             .replace(new RegExp(`^([0-9]{${ maxInt }})[0-9]*`), '$1');
 
         if (maxDecimal) {
-            newValue = newValue.replace(new RegExp(`(\.[0-9]{${ maxDecimal }})[0-9]*$`), '$1');
+            newValue = newValue.replace(new RegExp(`(\\.[0-9]{${ maxDecimal }})[0-9]*$`), '$1');
         } else {
             newValue = newValue.replace(/\.[0-9]*/, '');
         }
@@ -312,7 +312,7 @@ function updateUI(currentInp: Input | null = null) {
         INPUTS.paceSec.value = Math
             .round(STATE.pace % MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
     if (currentInp !== INPUTS.timeHr && currentInp !== INPUTS.timeMin && currentInp !== INPUTS.timeSec) {
         INPUTS.timeHr.value = String(Math.floor(STATE.time / HR_TO_SEC));
@@ -321,13 +321,13 @@ function updateUI(currentInp: Input | null = null) {
         INPUTS.timeMin.value = Math
             .floor((STATE.time % HR_TO_SEC) / MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
     if (currentInp !== INPUTS.timeSec) {
         INPUTS.timeSec.value = Math
             .round(STATE.time % MIN_TO_SEC)
             .toString()
-            .padStart(MAX_DEC_PLACE, '0');
+            .padStart(2, '0');
     }
 
     // Set predicited times
@@ -404,7 +404,7 @@ function estimateTime(fromDist: number, fromTime: number, toDist: number): numbe
 //
 
 function formatDecimal(num: number, max: number): number {
-    const POW = 10 ** (max + 1);
+    const POW = 10 ** max;
     return Math.round(num * POW) / POW;
 }
 
