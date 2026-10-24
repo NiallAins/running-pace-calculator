@@ -111,7 +111,7 @@ function init() {
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         installEvent = e as any;
-        INPUTS.download.hidden = false;
+        INPUTS.download.removeAttribute('hidden');
     });
     INPUTS.download.onclick = () => installEvent?.prompt();
 
