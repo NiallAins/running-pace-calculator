@@ -263,7 +263,8 @@ label {
 }
 
 @media (display-mode: standalone) {
-    #appbar {
+    #appbar,
+    .download {
         display: none;
     }
 }
