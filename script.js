@@ -23,29 +23,26 @@ const STATE = {
 // Elements
 //
 const INPUTS = {
-    dist: getInputEl('INP_DIST'),
-    unitKm: getInputEl('INP_UNIT_KM'),
-    unitMi: getInputEl('INP_UNIT_MI'),
-    paceMin: getInputEl('INP_PACE_MIN'),
-    paceSec: getInputEl('INP_PACE_SEC'),
-    timeHr: getInputEl('INP_TIME_HR'),
-    timeMin: getInputEl('INP_TIME_MIN'),
-    timeSec: getInputEl('INP_TIME_SEC'),
-    distHalf: getInputEl('INP_DIST_HALF'),
-    distMarathon: getInputEl('INP_DIST_MARATHON'),
-    distBackyard: getInputEl('INP_DIST_BACKYARD'),
-    download: getOutputEl('EL_DOWNLOAD')
+    dist: getEl('INP_DIST'),
+    unitKm: getEl('INP_UNIT_KM'),
+    unitMi: getEl('INP_UNIT_MI'),
+    paceMin: getEl('INP_PACE_MIN'),
+    paceSec: getEl('INP_PACE_SEC'),
+    timeHr: getEl('INP_TIME_HR'),
+    timeMin: getEl('INP_TIME_MIN'),
+    timeSec: getEl('INP_TIME_SEC'),
+    distHalf: getEl('INP_DIST_HALF'),
+    distMarathon: getEl('INP_DIST_MARATHON'),
+    distBackyard: getEl('INP_DIST_BACKYARD'),
+    download: getEl('EL_DOWNLOAD')
 }, OUTPUTS = {
-    distUnits: getOutputEl('EL_DIST_UNITS'),
-    paceUnits: getOutputEl('EL_PACE_UNITS'),
-    paceSpeedSm: getOutputEl('EL_PACE_SPEED_SM'),
-    paceSpeedLg: getOutputEl('EL_PACE_SPEED_LG'),
-    predicted: getOutputEl('EL_PREDICTED'),
+    distUnits: getEl('EL_DIST_UNITS'),
+    paceUnits: getEl('EL_PACE_UNITS'),
+    paceSpeedSm: getEl('EL_PACE_SPEED_SM'),
+    paceSpeedLg: getEl('EL_PACE_SPEED_LG'),
+    predicted: getEl('EL_PREDICTED'),
 };
-function getInputEl(id) {
-    return document.getElementById(id);
-}
-function getOutputEl(id) {
+function getEl(id) {
     return document.getElementById(id);
 }
 //
@@ -54,12 +51,12 @@ function getOutputEl(id) {
 function init() {
     // Web app download button
     let installEvent = null;
+    INPUTS.download.onclick = () => installEvent?.prompt();
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         installEvent = e;
         INPUTS.download.removeAttribute('hidden');
     });
-    INPUTS.download.onclick = () => installEvent?.prompt();
     // Init default state
     INPUTS.unitKm.checked = STATE.isMetric;
     INPUTS.unitMi.checked = !STATE.isMetric;

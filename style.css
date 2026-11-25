@@ -9,6 +9,7 @@ html {
 }
 
 body {
+  margin: 0;
   background-color: #ff7f2f;
 }
 
@@ -207,4 +208,10 @@ label {
   background-image: url("./icons/download.svg");
   background-size: cover;
   cursor: pointer;
+}
+
+@media (display-mode: standalone) {
+  #appbar {
+    display: none;
+  }
 }
